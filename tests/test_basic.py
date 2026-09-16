@@ -8,6 +8,10 @@ def test_basic_tokenizer_roundtrip():
     tokenizer.train(text, 259)
 
     tokens = tokenizer.encode(text)
+
+    # The tokenizer should learn 3 BPE merges.
+    assert tokens == [258, 100, 258, 97, 99]
+
     decoded = tokenizer.decode(tokens)
 
     assert decoded == text
@@ -25,16 +29,18 @@ def test_basic_tokenizer_unicode():
     assert decoded == text
 
 
-def test_save_and_load():
+def test_save_and_load(tmp_path):
     text = "aaabdaaabac"
 
     tokenizer = BasicTokenizer()
     tokenizer.train(text, 259)
 
-    model_file = tokenizer.save("test_model")
+    model_file = tmp_path / "test_model"
+
+    tokenizer.save(str(model_file))
 
     loaded_tokenizer = BasicTokenizer()
-    loaded_tokenizer.load(model_file)
+    loaded_tokenizer.load(str(model_file) + ".model")
 
     original_tokens = tokenizer.encode(text)
     loaded_tokens = loaded_tokenizer.encode(text)
